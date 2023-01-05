@@ -27,4 +27,4 @@ class DataManager:
         }
         put_response = requests.put(url=sheety_put_endpoint, headers=self.sheety_headers, json=put_json)
         put_response.raise_for_status()
-        print(put_response)
+        print(f"Put request to row {row_id}: {put_response}")
