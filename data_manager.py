@@ -13,12 +13,12 @@ class DataManager:
         self.sheety_headers = {
             "Authorization": f"Bearer {self.sheety_flight_deals_token}"
         }
-        self.sheety_json = requests.get(url=self.sheety_flight_deals_endpoint, headers=self.sheety_headers).json()
-        print(self.sheety_json)
+        self.sheety_json = self.get_sheety_data()
 
     def get_sheety_data(self):
-        self.sheety_json = requests.get(url=self.sheety_flight_deals_endpoint, headers=self.sheety_headers).json()
-        print(self.sheety_json)
+        json = requests.get(url=self.sheety_flight_deals_endpoint, headers=self.sheety_headers).json()
+        print(json)
+        return json
 
     def update_row(self, row_id, new_data):
         sheety_put_endpoint = f"{self.sheety_flight_deals_endpoint}/{row_id}"

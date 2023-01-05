@@ -4,4 +4,4 @@
 from flight_data import FlightData
 
 flight_data = FlightData()
-flight_data.update_all_iata_codes()
+flight_data.get_all_cheapest_flights()

@@ -14,3 +14,8 @@ class FlightData:
             row["iataCode"] = self.flight_search.get_city_iata_code(row["city"])
             print(row)
             self.data_manager.update_row(row_id=row["id"], new_data=row)
+
+    def get_all_cheapest_flights(self):
+        all_flights = [self.flight_search.get_flights_by_cities(f"{row['iataCode']}")
+                       for row in self.data_manager.sheety_json["prices"]]
+        print(all_flights)
