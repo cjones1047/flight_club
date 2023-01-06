@@ -23,9 +23,11 @@ class FlightData:
         for row in self.data_manager.sheety_json["prices"]:
             current_flight_price = all_flights[row["iataCode"]]["data"][0]["price"]
             last_lowest_price = row["lowestPrice"]
-            if current_flight_price < last_lowest_price:
-                row["lowestPrice"] = current_flight_price
-                row_id = row["id"]
+            row["lowestPrice"] = current_flight_price
+            row_id = row["id"]
+            if current_flight_price > last_lowest_price:
+                self.data_manager.update_row(row_id=row_id, new_data=row)
+            elif current_flight_price < last_lowest_price:
                 departure_airport_code = all_flights[row["iataCode"]]["data"][0]["route"][0]["flyFrom"]
                 arrival_airport_code = all_flights[row["iataCode"]]["data"][0]["route"][0]["flyTo"]
                 departure_datetime = datetime.datetime.strptime(
@@ -33,9 +35,9 @@ class FlightData:
                     '%Y-%m-%dT%H:%M:%S.%f%z'
                 )
                 departure_date_formatted = departure_datetime.strftime("%m/%d/%Y")
-                departure_time_formatted = departure_datetime.strftime("%-I:%M %p")
+                departure_time_formatted = departure_datetime.strftime("%-I:%M%p")
                 link = all_flights[row["iataCode"]]["data"][0]["deep_link"]
-                self.data_manager.update_row(row_id=row_id, new_data=row)
+
                 print(f"New low price to {row['city']}-{arrival_airport_code} from Chicago-{departure_airport_code} "
                       f"down from {'${:,.2f}'.format(last_lowest_price)} "
                       f"to {'${:,.2f}'.format(row['lowestPrice'])}. "
@@ -43,8 +45,6 @@ class FlightData:
                       "\n\n"
                       f"Link to purchase:\n"
                       f"{link}")
-            else:
-                print(f"{'${:,.2f}'.format(row['lowestPrice'])} is still the lowest price.")
 
     def get_sheety_data_as_dict(self):
         sheety_dict = {f"{row['iataCode']}": row for row in self.data_manager.sheety_json["prices"]}
