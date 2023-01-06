@@ -1,5 +1,6 @@
 from data_manager import DataManager
 from flight_search import FlightSearch
+from notification_manager import NotificationManager
 import datetime
 
 
@@ -9,6 +10,7 @@ class FlightData:
     def __init__(self):
         self.data_manager = DataManager()
         self.flight_search = FlightSearch()
+        self.notification_manager = NotificationManager()
 
     def update_all_iata_codes(self):
         for row in self.data_manager.sheety_json["prices"]:
@@ -25,9 +27,9 @@ class FlightData:
             last_lowest_price = row["lowestPrice"]
             row["lowestPrice"] = current_flight_price
             row_id = row["id"]
-            if current_flight_price > last_lowest_price:
+            if current_flight_price != last_lowest_price:
                 self.data_manager.update_row(row_id=row_id, new_data=row)
-            elif current_flight_price < last_lowest_price:
+            if current_flight_price < last_lowest_price:
                 departure_airport_code = all_flights[row["iataCode"]]["data"][0]["route"][0]["flyFrom"]
                 arrival_airport_code = all_flights[row["iataCode"]]["data"][0]["route"][0]["flyTo"]
                 departure_datetime = datetime.datetime.strptime(
@@ -38,13 +40,17 @@ class FlightData:
                 departure_time_formatted = departure_datetime.strftime("%-I:%M%p")
                 link = all_flights[row["iataCode"]]["data"][0]["deep_link"]
 
-                print(f"New low price to {row['city']}-{arrival_airport_code} from Chicago-{departure_airport_code} "
-                      f"down from {'${:,.2f}'.format(last_lowest_price)} "
-                      f"to {'${:,.2f}'.format(row['lowestPrice'])}. "
-                      f"Flight leaves {departure_date_formatted} at {departure_time_formatted}"
-                      "\n\n"
-                      f"Link to purchase:\n"
-                      f"{link}")
+                message = (
+                    f"New low price to {row['city']}-{arrival_airport_code} from Chicago-{departure_airport_code} "
+                    f"down from {'${:,.2f}'.format(last_lowest_price)} "
+                    f"to {'${:,.2f}'.format(row['lowestPrice'])}"
+                    "\n\n"
+                    f"Flight leaves {departure_date_formatted} at {departure_time_formatted}"
+                    "\n\n"
+                    f"Link to check it out:\n"
+                    f"{link}"
+                )
+                self.notification_manager.send_text_message(message=message)
 
     def get_sheety_data_as_dict(self):
         sheety_dict = {f"{row['iataCode']}": row for row in self.data_manager.sheety_json["prices"]}
