@@ -19,39 +19,50 @@ class FlightData:
             self.data_manager.update_row(row_id=row["id"], new_data=row)
 
     def update_cheapest_flights(self):
-        all_flights = {f"{row['iataCode']}": self.flight_search.get_flights_by_cities(f"{row['iataCode']}")
-                       for row in self.data_manager.sheety_json["prices"]}
+        all_sheet_flights_dict = {f"{row['iataCode']}": self.flight_search.get_flights_by_cities(f"{row['iataCode']}")
+                                  for row in self.data_manager.sheety_json["prices"]}
 
         for row in self.data_manager.sheety_json["prices"]:
-            current_flight_price = all_flights[row["iataCode"]]["data"][0]["price"]
-            last_lowest_price = row["lowestPrice"]
-            row["lowestPrice"] = current_flight_price
-            row_id = row["id"]
-            if current_flight_price != last_lowest_price:
-                self.data_manager.update_row(row_id=row_id, new_data=row)
-            if current_flight_price < last_lowest_price:
-                departure_airport_code = all_flights[row["iataCode"]]["data"][0]["route"][0]["flyFrom"]
-                arrival_airport_code = all_flights[row["iataCode"]]["data"][0]["route"][0]["flyTo"]
+            message = ''
+            try:
+                current_flight_price = all_sheet_flights_dict[row["iataCode"]]["data"][0]["price"]
+            except IndexError:
+                message = f"No non-stop flights to {row['city']}-{row['iataCode']} found from anywhere in Chicago..."
+            else:
+                last_lowest_price = row["lowestPrice"]
+                row["lowestPrice"] = current_flight_price
+                row_id = row["id"]
+                if current_flight_price != last_lowest_price:
+                    self.data_manager.update_row(row_id=row_id, new_data=row)
+                departure_airport_code = all_sheet_flights_dict[row["iataCode"]]["data"][0]["route"][0]["flyFrom"]
+                arrival_airport_code = all_sheet_flights_dict[row["iataCode"]]["data"][0]["route"][0]["flyTo"]
                 departure_datetime = datetime.datetime.strptime(
-                    all_flights[row["iataCode"]]["data"][0]["local_departure"],
+                    all_sheet_flights_dict[row["iataCode"]]["data"][0]["local_departure"],
                     '%Y-%m-%dT%H:%M:%S.%f%z'
                 )
                 departure_date_formatted = departure_datetime.strftime("%m/%d/%Y")
                 departure_time_formatted = departure_datetime.strftime("%-I:%M%p")
-                link = all_flights[row["iataCode"]]["data"][0]["deep_link"]
+                link = all_sheet_flights_dict[row["iataCode"]]["data"][0]["deep_link"]
 
+                formatted_price_drop = self.format_price_to_usd(last_lowest_price)
+                formatted_low_price = self.format_price_to_usd(row['lowestPrice'])
                 message = (
-                    f"New low price to {row['city']}-{arrival_airport_code} from Chicago-{departure_airport_code} "
-                    f"down from {'${:,.2f}'.format(last_lowest_price)} "
-                    f"to {'${:,.2f}'.format(row['lowestPrice'])}"
+                    f"Low price to {row['city']}-{arrival_airport_code} from Chicago-{departure_airport_code} "
+                    f"{f'down from {formatted_price_drop} ' if current_flight_price < last_lowest_price else ''}"
+                    f"now at {formatted_low_price}"
                     "\n\n"
                     f"Flight leaves {departure_date_formatted} at {departure_time_formatted}"
                     "\n\n"
                     f"Link to check it out:\n"
                     f"{link}"
                 )
+            finally:
                 self.notification_manager.send_text_message(message=message)
 
     def get_sheety_data_as_dict(self):
         sheety_dict = {f"{row['iataCode']}": row for row in self.data_manager.sheety_json["prices"]}
         return sheety_dict
+
+    @staticmethod
+    def format_price_to_usd(price):
+        return '${:,.2f}'.format(price)
