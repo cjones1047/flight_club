@@ -35,7 +35,8 @@ class FlightSearch:
             "date_from": f"{tomorrow}",
             "date_to": f"{six_months_away}",
             "one_for_city": "1",
-            "curr": "USD"
+            "curr": "USD",
+            "max_stopovers": "0"
         }
         all_flights_response = requests.get(url=search_endpoint, params=search_params, headers=self.tequila_headers)
         all_flights_response.raise_for_status()
