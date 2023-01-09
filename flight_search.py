@@ -15,6 +15,7 @@ class FlightSearch:
             "accept": "application/json",
             "apikey": f"{self.tequila_api_key}"
         }
+        self.all_flights_json = ''
 
     def get_city_iata_code(self, city_name):
         get_city_endpoint = "https://api.tequila.kiwi.com/locations/query?" \
@@ -29,20 +30,24 @@ class FlightSearch:
         tomorrow = self.format_date(tomorrow)
         six_months_away = self.format_date(six_months_away)
         search_endpoint = "https://api.tequila.kiwi.com/v2/search"
-        search_params = {
-            "fly_from": "CHI",
-            "fly_to": f"{city_code}",
-            "date_from": f"{tomorrow}",
-            "date_to": f"{six_months_away}",
-            "one_for_city": "1",
-            "curr": "USD",
-            "max_stopovers": "0"
-        }
-        all_flights_response = requests.get(url=search_endpoint, params=search_params, headers=self.tequila_headers)
-        all_flights_response.raise_for_status()
-        print(all_flights_response.text)
-        all_flights_json = all_flights_response.json()
-        return all_flights_json
+        for stopovers in range(3):
+            search_params = {
+                "fly_from": "CHI",
+                "fly_to": f"{city_code}",
+                "date_from": f"{tomorrow}",
+                "date_to": f"{six_months_away}",
+                "one_for_city": "1",
+                "curr": "USD",
+                "max_stopovers": f"{stopovers}"
+            }
+            all_flights_response = requests.get(url=search_endpoint, params=search_params, headers=self.tequila_headers)
+            all_flights_response.raise_for_status()
+            print(all_flights_response.text)
+            self.all_flights_json = all_flights_response.json()
+            if self.all_flights_json["_results"] > 0:
+                return self.all_flights_json
+        else:
+            return self.all_flights_json
 
     @staticmethod
     def format_date(this_date):

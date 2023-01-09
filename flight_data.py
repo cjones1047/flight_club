@@ -57,7 +57,8 @@ class FlightData:
                     f"{link}"
                 )
             finally:
-                self.notification_manager.send_text_message(message=message)
+                # self.notification_manager.send_text_message(message=message)
+                print(message)
 
     def get_sheety_data_as_dict(self):
         sheety_dict = {f"{row['iataCode']}": row for row in self.data_manager.sheety_json["prices"]}
