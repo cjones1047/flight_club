@@ -11,6 +11,7 @@ class FlightData:
         self.data_manager = DataManager()
         self.flight_search = FlightSearch()
         self.notification_manager = NotificationManager()
+        self.all_cheapest_flights_list = []
 
     def update_all_iata_codes(self):
         for row in self.data_manager.sheety_json["prices"]:
@@ -21,6 +22,8 @@ class FlightData:
     def update_cheapest_flights(self):
         all__low_flights_dict = {f"{row['iataCode']}": self.flight_search.get_flights_by_cities(f"{row['iataCode']}")
                                  for row in self.data_manager.sheety_json["prices"]}
+
+        new_cheapest_flights_list = []
 
         for row in self.data_manager.sheety_json["prices"]:
             message = ''
@@ -71,7 +74,9 @@ class FlightData:
                 )
             finally:
                 # self.notification_manager.send_text_message(message=message)
-                print(message)
+                new_cheapest_flights_list.append(message)
+
+        self.all_cheapest_flights_list = new_cheapest_flights_list
 
     def get_sheety_data_as_dict(self):
         sheety_dict = {f"{row['iataCode']}": row for row in self.data_manager.sheety_json["prices"]}
@@ -80,3 +85,15 @@ class FlightData:
     @staticmethod
     def format_price_to_usd(price):
         return '${:,.2f}'.format(price)
+
+    def email_all_members_deals(self):
+        all_members_json = self.data_manager.get_sheety_users()
+        email_body = f"\n\n{'_' * 50}\n\n".join(self.all_cheapest_flights_list)
+
+        for row in all_members_json["users"]:
+            recipient = row["email"]
+            user_first_name = row["firstName"]
+            print(recipient)
+            print(user_first_name)
+            print(email_body)
+

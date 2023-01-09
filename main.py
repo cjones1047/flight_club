@@ -5,3 +5,4 @@ from flight_data import FlightData
 
 flight_data = FlightData()
 flight_data.update_cheapest_flights()
+flight_data.email_all_members_deals()
