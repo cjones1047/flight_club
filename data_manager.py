@@ -16,9 +16,9 @@ class DataManager:
         self.sheety_json = self.get_sheety_data()
 
     def get_sheety_data(self):
-        json = requests.get(url=self.sheety_flight_deals_endpoint, headers=self.sheety_headers).json()
-        print(json)
-        return json
+        new_sheety_json = requests.get(url=self.sheety_flight_deals_endpoint, headers=self.sheety_headers).json()
+        print(new_sheety_json)
+        return new_sheety_json
 
     def update_row(self, row_id, new_data):
         sheety_put_endpoint = f"{self.sheety_flight_deals_endpoint}/{row_id}"

@@ -30,7 +30,7 @@ class FlightSearch:
         tomorrow = self.format_date(tomorrow)
         six_months_away = self.format_date(six_months_away)
         search_endpoint = "https://api.tequila.kiwi.com/v2/search"
-        for stopovers in range(3):
+        for stopovers in range(2):
             search_params = {
                 "fly_from": "CHI",
                 "fly_to": f"{city_code}",
