@@ -93,7 +93,8 @@ class FlightData:
         for row in all_members_json["users"]:
             recipient = row["email"]
             user_first_name = row["firstName"]
-            print(recipient)
-            print(user_first_name)
-            print(email_body)
-
+            # print(recipient)
+            # print(user_first_name)
+            # print(email_body)
+            subject_str = f"Here's your flight deals, {user_first_name}"
+            self.notification_manager.send_email(recipient_email=recipient, subject=subject_str, body=email_body)

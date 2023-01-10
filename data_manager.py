@@ -19,14 +19,14 @@ class DataManager:
     def get_sheety_data(self):
         new_sheety_response = requests.get(url=self.sheety_flight_deals_endpoint, headers=self.sheety_headers)
         new_sheety_response.raise_for_status()
-        print(new_sheety_response.text)
+        # print(new_sheety_response.text)
         new_sheety_json = new_sheety_response.json()
         return new_sheety_json
 
     def get_sheety_users(self):
         all_users_response = requests.get(url=self.sheety_users_endpoint, headers=self.sheety_headers)
         all_users_response.raise_for_status()
-        print(all_users_response.text)
+        # print(all_users_response.text)
         all_users_json = all_users_response.json()
         return all_users_json
 
